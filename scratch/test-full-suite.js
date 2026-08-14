@@ -1,6 +1,6 @@
 const http = require('http');
 
-const PORT = 3001; // Dev server port
+const PORT = 3002; // Dev server port
 
 function makeRequest(path, method = 'GET', bodyData = null) {
   return new Promise((resolve, reject) => {

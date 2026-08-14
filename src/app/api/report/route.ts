@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { memoryStore } from '@/lib/store';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 export async function POST(req: NextRequest) {
+  const clientIp = req.headers.get('x-forwarded-for') || '127.0.0.1';
+  const { allowed } = checkRateLimit(clientIp, 10, 60000); // 10 report submissions per min
+
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Too many report submissions. Please wait a minute.' },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await req.json();
     const { productName, verdict, flags, note, city, batchNumber, imageUrl } = body;
@@ -20,9 +31,9 @@ export async function POST(req: NextRequest) {
     const reportData = {
       id: `rep-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       productId: productName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-      productName,
+      productName: String(productName).slice(0, 150),
       verdict,
-      flags: Array.isArray(flags) ? flags : [],
+      flags: Array.isArray(flags) ? flags.slice(0, 10) : [],
       note: typeof note === 'string' ? note.slice(0, 1000) : '',
       city: typeof city === 'string' ? city.slice(0, 100) : '',
       batchNumber: typeof batchNumber === 'string' ? batchNumber.slice(0, 50) : '',
