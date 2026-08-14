@@ -6,6 +6,8 @@ import { SearchSection } from '@/components/search/SearchSection';
 import { InvestigationView } from '@/components/investigation/InvestigationView';
 import { ReportModal } from '@/components/reports/ReportModal';
 import { Investigation, CommunityStats } from '@/types';
+import { runInvestigation } from '@/lib/investigation';
+import { memoryStore } from '@/lib/store';
 import { ShieldCheck, HeartPulse, Building2, Lock } from 'lucide-react';
 
 export default function Home() {
@@ -16,15 +18,21 @@ export default function Home() {
   const handleInvestigate = async (params: { query?: string; imageBase64?: string }) => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/investigate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(params),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to complete investigation.');
+      let data: Investigation;
+      try {
+        const res = await fetch('/api/investigate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(params),
+        });
+        if (res.ok) {
+          data = await res.json();
+        } else {
+          data = await runInvestigation(params);
+        }
+      } catch {
+        // Direct browser fallback for static hosting
+        data = await runInvestigation(params);
       }
 
       setActiveInvestigation(data);
@@ -40,7 +48,7 @@ export default function Home() {
     setActiveInvestigation(null);
   };
 
-  const handleReportSubmitted = (updatedStats: CommunityStats) => {
+  const handleReportSubmitted = async (updatedStats: CommunityStats) => {
     if (activeInvestigation) {
       setActiveInvestigation((prev) => (prev ? { ...prev, communityStats: updatedStats } : null));
     }

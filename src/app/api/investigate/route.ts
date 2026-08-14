@@ -4,7 +4,7 @@ import { checkRateLimit } from '@/lib/rateLimit';
 
 export async function POST(req: NextRequest) {
   const clientIp = req.headers.get('x-forwarded-for') || '127.0.0.1';
-  const { allowed } = checkRateLimit(clientIp, 15, 60000); // 15 requests per min
+  const { allowed } = checkRateLimit(clientIp, 15, 60000);
 
   if (!allowed) {
     return NextResponse.json(
@@ -24,16 +24,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (query && typeof query !== 'string') {
-      return NextResponse.json({ error: 'Invalid search query format.' }, { status: 400 });
-    }
-
-    if (imageBase64 && typeof imageBase64 !== 'string') {
-      return NextResponse.json({ error: 'Invalid image format.' }, { status: 400 });
-    }
-
     const investigation = await runInvestigation({
-      query: query ? query.slice(0, 200) : undefined,
+      query: query ? String(query).slice(0, 200) : undefined,
       imageBase64: imageBase64 || undefined,
     });
 

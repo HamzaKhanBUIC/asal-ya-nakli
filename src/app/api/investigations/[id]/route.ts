@@ -1,4 +1,9 @@
+export const dynamic = 'force-static';
 import { NextRequest, NextResponse } from 'next/server';
+
+export async function generateStaticParams() {
+  return [{ id: 'AYN-DEMO' }];
+}
 import { memoryStore } from '@/lib/store';
 
 export async function GET(

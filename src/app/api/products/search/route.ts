@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { searchDrapRegistry } from '@/lib/providers/drap';
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const q = searchParams.get('q') || '';
+  const url = new URL(req.url, 'http://localhost');
+  const q = url.searchParams.get('q') || '';
 
   if (!q.trim()) {
     return NextResponse.json({ results: [] });
