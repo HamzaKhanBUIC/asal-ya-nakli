@@ -1,0 +1,32 @@
+{
+  "name": "asal-ya-nakli",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "groq-sdk": "^1.5.0",
+    "lucide-react": "^0.475.0",
+    "next": "^15.1.7",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@supabase/supabase-js": "^2.49.1",
+    "tailwind-merge": "^3.6.0"
+  },
+  "devDependencies": {
+    "@next/swc-win32-x64-msvc": "15.1.7",
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.1.7",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

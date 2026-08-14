@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f9f9ff;
+  --surface: #ffffff;
+  --surface-container: #e9edff;
+  --surface-low: #f1f3ff;
+  --on-surface: #141b2b;
+  --on-surface-variant: #404944;
+  --primary: #003527;
+  --primary-container: #064e3b;
+  --on-primary: #ffffff;
+  --on-primary-container: #80bea6;
+  --secondary: #904d00;
+  --secondary-container: #fe932c;
+  --tertiary: #640006;
+  --outline: #e2e8f0;
+  --outline-variant: #cbd5e1;
+}
+
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--on-surface);
+    font-family: var(--font-geist-sans), 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+.font-urdu {
+  font-family: 'Nastaliq', 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

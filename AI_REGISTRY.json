@@ -1,0 +1,35 @@
+{
+  "project": "Chai and Code",
+  "skills": [
+    {
+      "id": "karpathy-rules",
+      "name": "Karpathy Coding Rules",
+      "description": "4 core coding rules: Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven."
+    },
+    {
+      "id": "spec-first-grill-me",
+      "name": "Spec-First & Grill-Me",
+      "description": "Forces AI to interview you and lock down specs before writing code."
+    },
+    {
+      "id": "hamzas-expert-workflow",
+      "name": "Hamza's Expert AI Workflow",
+      "description": "Step-by-step method for scalable AI engineering and build specs."
+    },
+    {
+      "id": "design-taste-frontend",
+      "name": "Frontend Design Taste & Anti-Pattern Rules",
+      "description": "Frontend taste library and visual anti-pattern guardrails for pristine UI/UX."
+    },
+    {
+      "id": "shadcn-ui",
+      "name": "Shadcn UI & Component Architecture",
+      "description": "Modern accessible UI components and design system rules."
+    },
+    {
+      "id": "codebase-memory",
+      "name": "Codebase Memory AST Graph",
+      "description": "Fast tree-sitter AST knowledge graph for codebase navigation."
+    }
+  ]
+}
