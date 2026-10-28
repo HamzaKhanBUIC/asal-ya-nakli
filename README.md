@@ -1,124 +1,72 @@
 # Asal ya Nakli (اصل یا نقلی)
 
-> Evidence-based medicine authenticity and regulatory verification platform combining DRAP registries, WHO safety alerts, and multimodal vision OCR.
+> Checks whether a medicine looks genuine by matching it against a registry list and safety alerts, then scoring the risk with fixed rules, because counterfeit-medicine warnings are hard for buyers to find at the counter.
 
-[![Live App](https://img.shields.io/badge/Live_App-asal--ya--nakli.web.app-064e3b?style=flat-square&logo=googlecloud&logoColor=white)](https://asal-ya-nakli.web.app)
-[![GitHub Repo](https://img.shields.io/badge/GitHub-HamzaKhanBUIC%2Fasal--ya--nakli-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/HamzaKhanBUIC/asal-ya-nakli)
-[![Next.js 15](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
-[![Database](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com/)
+**Status:** Client-side prototype, built in one evening (first commits 2026-08-14) · uses small hand-written seed lists, not live DRAP or WHO data · no working photo OCR
+**Demo:** [asal-ya-nakli.web.app](https://asal-ya-nakli.web.app) (static site on Firebase Hosting; everything runs in your browser)
 
 ---
 
-## Overview
+## What it does
 
-Falsified and substandard pharmaceuticals pose a significant public health hazard in developing healthcare markets. Regulatory warnings issued by public authorities often remain trapped in static PDF circulars that are difficult for consumers to cross-reference at point-of-sale.
-
-**Asal ya Nakli** is an open verification platform that evaluates pharmaceutical product authenticity by correlating four independent verification vectors:
-1. **Regulatory Registry Lookups**: Cross-references active registration numbers and authorized manufacturers against Drug Regulatory Authority of Pakistan (DRAP) datasets.
-2. **Global Health Alerts**: Checks against World Health Organization (WHO) Medical Product Alerts for known counterfeit batch signatures.
-3. **Multimodal Vision OCR**: Uses vision models to extract batch numbers, manufacturing dates, and registration strings from medicine box photos.
-4. **Community Incident Reports**: Aggregates localized reports tagged by pharmacy and geographic location.
-
----
-
-## System Architecture
+You type a medicine name (or upload a photo) and the app returns a 0-100 authenticity score with a breakdown.
 
 ```mermaid
 graph TD
-    A[Citizen Query / Packaging Photo] --> B[Verification Engine]
-    B --> C[1. DRAP Registry Lookup]
-    B --> D[2. WHO Safety Alert Check]
-    B --> E[3. Vision OCR Extraction]
-    B --> F[4. Community Report Aggregator]
-    C --> G[Deterministic Risk Calculator]
+    A[Product name or photo] --> B[Investigation in the browser]
+    B --> C[Registry lookup: DRAP seed list]
+    B --> D[Alert lookup: WHO/DRAP seed list]
+    B --> E[Photo extraction: sample data only]
+    B --> F[Community reports: in-memory]
+    C --> G[Rule-based risk score]
     D --> G
     E --> G
     F --> G
-    G --> H[Authenticity Score 0-100 & Breakdown Report]
+    G --> H[Score 0-100 and report]
 ```
 
----
+- Risk scoring is deterministic rules with the result clamped to 0-100 (`src/lib/risk/engine.ts`).
+- Registry data is `DRAP_REGISTRY_SEED` in `src/lib/providers/drap.ts`. Alert data is in `src/lib/providers/who.ts`. Both are hand-written samples with a few entries; nothing is fetched from DRAP or WHO.
+- The deployed app is a static export (`output: "export"` in `next.config.ts`). The API routes under `src/app/api/` are stubs; when `/api/investigate` does not return a result, `src/app/page.tsx` runs the investigation in the browser.
 
-## Core Capabilities
+## Quickstart
 
-- **Deterministic Risk Scoring**: Prevents generative hallucination of safety scores through a bounded rule matrix incorporating official registry status, alert matches, and batch consistency.
-- **Multimodal OCR Extraction**: Automatically extracts dosage, registration number, and batch codes from user-submitted packaging photos.
-- **Sanitized Prompt Boundaries**: User text and OCR extractions are encapsulated in structured boundaries to mitigate prompt injection risks.
-- **Sliding-Window Rate Limiting**: Protects backend verification endpoints from automated request scraping.
+Requires Node.js 18.18 or newer.
 
----
-
-## Verification & Test Suite
-
-The repository includes an automated 6-point verification suite (`scratch/test-full-suite.js`):
-
-```text
-====================================================
- ASAL YA NAKLI : COMPREHENSIVE VERIFICATION SUITE
-====================================================
-
-[TEST 1] Authentic Product Search ("Panadol 500mg").......... PASSED (DRAP Reg #001234)
-[TEST 2] WHO Safety Alert Corroboration ("Augmentin 625mg").... PASSED (WHO Alert N9/2025)
-[TEST 3] Vision OCR Analysis (Base64 Photo)................... PASSED (Batch Extracted)
-[TEST 4] Community Reporting ("Panadol 500mg")................ PASSED (Report ID Logged)
-[TEST 5] Shareable Record Link Retrieval..................... PASSED (Record Retrieved)
-[TEST 6] Recent Community Reports Feed...................... PASSED (Feed Retrieved)
-
-====================================================
- TEST SUMMARY: 6 PASSED | 0 FAILED (100% PASS RATE)
-====================================================
+```bash
+git clone https://github.com/HamzaKhanBUIC/asal-ya-nakli.git
+cd asal-ya-nakli
+npm install
+npm run dev
 ```
 
----
+Open http://localhost:3000. Other scripts: `npm run build` (static export to `out/`), `npm run lint`.
 
-## Tech Stack
+## Configuration
 
-| Layer | Technology |
-| :--- | :--- |
-| **Frontend** | Next.js 15 (App Router, Server and Client Components) |
-| **Styling** | Tailwind CSS |
-| **Database** | Supabase Cloud PostgreSQL with Row-Level Security (RLS) |
-| **Vision OCR** | Groq Server-Side API (`llama-3.3-70b-versatile`) |
-| **Hosting** | Firebase Cloud Hosting |
+No environment variables are needed for the demo behaviour. The code reads these optional ones:
 
----
+| Variable | Read in | Effect |
+| :-- | :-- | :-- |
+| `GROQ_API_KEY` | `src/lib/groq/client.ts` | Enables the Groq call for photo extraction (see Limitations) |
+| `NEXT_PUBLIC_SUPABASE_URL` | `src/lib/supabase/client.ts` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `src/lib/supabase/client.ts` | Supabase anonymous key |
+| `SUPABASE_SERVICE_ROLE_KEY` | `src/lib/supabase/client.ts` | Server-side Supabase key |
 
-## Local Setup
+`supabase/schema.sql` defines the tables for the optional Supabase store. The deployed demo has no Supabase configuration and keeps data in browser memory only.
 
-### Prerequisites
-- Node.js 18 or higher
-- npm 9 or higher
+## Limitations
 
-### Installation
+- **Photo OCR does not work.** `extractProductFromImage` in `src/lib/groq/client.ts` returns a hard-coded "Panadol 500mg, registration 001234, batch B8921" result when there is no Groq key or when the call fails, and merges those values into partial results. Any photo can therefore come back as Panadol. When a key is set, the request goes to `llama-3.3-70b-versatile`, which is a text model and not a vision model. On the deployed site no key exists, so photo input is always this sample result. Do not use it to judge a real medicine.
+- **Data is a seed list, not DRAP or WHO.** Only the sample products and alerts in `src/lib/providers/` can match.
+- **Community reports are not shared.** The report endpoint is a no-op stub; reports stay in your browser's memory and are lost on reload.
+- **Shareable links** only work for the pre-rendered `/investigation/AYN-DEMO` page.
+- **No rate limiting.** `src/lib/rateLimit.ts` exists but nothing imports it.
+- **Supabase policy is open for writes.** `supabase/schema.sql` lets anonymous users insert rows (`WITH CHECK (true)`). Tighten it before deploying a real project.
+- **No tests.** `scratch/test-full-suite.js` expects a server on `localhost:3000`, which a static export does not provide, and two of its checks cannot pass against the current stubs. The earlier "6 passed" output was removed because it cannot be reproduced.
+- `next.config.ts` sets `typescript.ignoreBuildErrors` and `eslint.ignoreDuringBuilds`.
+- This is not medical or regulatory advice.
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/HamzaKhanBUIC/asal-ya-nakli.git
-   cd asal-ya-nakli
-   npm install
-   ```
+## License
 
-2. **Configure environment variables**:
-   Create `.env.local` in the project root:
-   ```env
-   GROQ_API_KEY=your_groq_api_key
-   NEXT_PUBLIC_SUPABASE_URL=https://your-supabase-project.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
-
-3. **Start development server**:
-   ```bash
-   npm run dev
-   ```
-   Open `http://localhost:3000` in your browser.
-
-4. **Run verification suite**:
-   ```bash
-   node scratch/test-full-suite.js
-   ```
-
----
-
-## License & Attribution
-
-Open-source under the MIT License. Developed with reference to public drug regulatory standards and WHO Global Surveillance guidance.
+No license file is included yet, so all rights are reserved by the author until one is added.
