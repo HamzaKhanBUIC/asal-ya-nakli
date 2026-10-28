@@ -69,4 +69,4 @@ No environment variables are needed for the demo behaviour. The code reads these
 
 ## License
 
-No license file is included yet, so all rights are reserved by the author until one is added.
+MIT. See [LICENSE](LICENSE).
